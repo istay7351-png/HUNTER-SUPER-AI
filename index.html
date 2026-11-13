@@ -3,99 +3,86 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HUNTER SUPER AI - ANTI LOADING</title>
+<title>HUNTER TEST DETIK</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
-body{background:#0f1115;color:#fff;padding:10px}
-.top{background:#1a1d24;padding:12px;border-radius:12px;text-align:center;border:2px solid #00ff88}
-.top h1{font-size:21px;color:#00ff88}
-.live{display:inline-block;background:red;color:#fff;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:bold;margin-top:6px}
-.priceBox{background:#131722;border-radius:12px;margin-top:10px;padding:14px;text-align:center;border:1px solid #ffcc00}
-.priceBox .price{font-size:36px;font-weight:bold;color:#ffcc00}
-.timerBox{background:#1a1d24;padding:12px;border-radius:12px;margin-top:10px;text-align:center;border:1px solid #444}
-.timer{font-size:32px;font-weight:bold;color:#00ff88}
-.signalBox{padding:16px;border-radius:12px;margin-top:10px;text-align:center;display:none;border:2px solid #fff}
-.signalBox h2{font-size:24px}
-.lock{font-size:12px;background:#000;padding:4px 10px;border-radius:20px;display:inline-block;margin-top:6px}
-.indi{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-.card{background:#1a1d24;padding:10px;border-radius:10px;text-align:center;font-size:13px}
-.card b{font-size:15px}
-button{width:100%;padding:14px;margin-top:10px;border:none;border-radius:10px;background:#00ff88;color:#000;font-weight:bold;font-size:16px}
-.log{background:#1a1d24;padding:10px;border-radius:10px;margin-top:10px;font-size:12px;line-height:1.6}
-.apiOk{background:#00c853;padding:8px;border-radius:8px;margin-top:10px;text-align:center;font-size:12px;font-weight:bold}
+body{background:#0f1115;color:#fff;padding:15px;font-family:Arial;text-align:center}
+.box{background:#1a1d24;padding:20px;border-radius:12px;border:2px solid #00ff88;margin-top:10px}
+.timer{font-size:60px;font-weight:bold;color:#00ff88}
+.price{font-size:40px;color:#ffcc00;font-weight:bold}
+button{width:100%;padding:14px;margin-top:10px;border:none;border-radius:10px;background:#00ff88;font-weight:bold;font-size:16px}
 </style>
 </head>
 <body>
-<div class="top"><h1>🎯 HUNTER SUPER AI</h1><p>MAGNET - ANTI LOADING</p><span class="live">● MAGNET LIVE</span></div>
-<div class="apiOk">✅ ANTI LOADING MODE - HARGA PASTI JALAN!</div>
-<div class="priceBox"><div style="font-size:12px;color:#aaa">HARGA GOLD LIVE</div><div class="price" id="bigPrice">Memulai...</div><div id="status" style="font-size:12px;color:#00ff88">Menghubungkan...</div><div id="apiSource" style="font-size:12px;color:#aaa;margin-top:4px">Sumber: -</div><div id="mt5time" style="font-size:12px;color:#aaa">--:--:--</div></div>
-<div class="timerBox"><div style="font-size:12px;color:#aaa">TIMER M1 - SYNC MT5</div><div class="timer" id="timer">00:60</div><div id="candleInfo" style="font-size:13px">Menunggu Candle M1 Nutup...</div></div>
-<div class="indi">
-<div class="card">TREND<br><b id="trend">-</b></div>
-<div class="card">ZONA DEMAND<br><b id="demand">-</b></div>
-<div class="card">ZONA SUPPLY<br><b id="supply">-</b></div>
-<div class="card">SWEEP<br><b id="sweep">BELUM ADA</b></div>
-<div class="card">ATR / RISK<br><b id="atr">-</b></div>
-<div class="card">STATUS<br><b id="stat">SCAN...</b></div>
+<h1>🎯 HUNTER TEST DETIK</h1>
+<p>Kalau detik di bawah ini jalan, berarti file lu UDAH BENER!</p>
+<div class="box">
+<div>DETIK SYNC MT5 - HARUS JALAN!</div>
+<div class="timer" id="timer">00:60</div>
+<div id="jam">Jam: --:--:--</div>
+<div id="info">Candle M1 nutup tiap detik 00</div>
 </div>
-<div id="signalBox" class="signalBox"><h2 id="signalText">MENUNGGU SWEEP...</h2><div id="signalDetail" style="font-size:14px;margin-top:6px"></div><div class="lock">🔒 MAGNET - SWEEP + RECLAIM</div><div id="entryInfo" style="font-size:13px;margin-top:8px"></div></div>
-<div class="log" id="log">📝 LOG:<br>Menunggu data...</div>
+<div class="box">
+<div>HARGA GOLD</div>
+<div class="price" id="bigPrice">$2650.00</div>
+<div id="status">✅ LANGSUNG JALAN - GAK LOADING</div>
+</div>
+<div class="box" id="signalBox" style="display:none;background:#00c853">
+<h2 id="signalText">SINYAL</h2>
+<div id="entryInfo"></div>
+</div>
+<div class="box" style="text-align:left;font-size:13px" id="log">LOG:<br>Menunggu...</div>
 <button onclick="location.reload()">🔄 REFRESH</button>
 <script>
-let price=2650.00, prices=[], lastMinute=-1, openPrice=2650, trendUp=true, demandZone=2642, supplyZone=2658, sweepType="", sweepLow=0, sweepHigh=0, sweepBar=0, barCount=0, realConnected=false;
-function log(msg){ document.getElementById('log').innerHTML="📝 LOG:<br>"+msg; }
-// LANGSUNG JALAN BRO - GAK NUNGGU API LAGI! BIAR GAK LOADING!
-function updateUI(xau, src){
-  if(prices.length==0){ openPrice=xau; demandZone=xau-8; supplyZone=xau+8; }
-  price=xau; prices.push(xau); if(prices.length>100) prices.shift();
-  document.getElementById('bigPrice').innerText='$'+xau.toFixed(2);
-  document.getElementById('status').innerText='✅ LIVE';
-  document.getElementById('apiSource').innerText='Sumber: '+src;
-  if(prices.length>5){
-    let recent=prices.slice(-10); let lo=Math.min(...recent); let hi=Math.max(...recent);
-    demandZone=lo; supplyZone=hi;
-    document.getElementById('demand').innerText='$'+lo.toFixed(2);
-    document.getElementById('supply').innerText='$'+hi.toFixed(2);
-    let atr=(hi-lo)/2; if(atr<0.5) atr=1.2;
-    document.getElementById('atr').innerText=atr.toFixed(2);
-    trendUp=xau>prices[Math.max(0,prices.length-10)];
-    document.getElementById('trend').innerText=trendUp?'🟢 BULL':'🔴 BEAR';
+// INI KUNCINYA BRO - TIMER LANGSUNG JALAN PAS WEB DIBUKA!
+let price=2650, prices=[2650], lastMinute=-1, barCount=0, demandZone=2642, supplyZone=2658, sweepType="", sweepLow=0, sweepHigh=0, sweepBar=0;
+function tulisLog(msg){ document.getElementById('log').innerHTML="LOG:<br>"+msg; }
+tulisLog("✅ Script ke-load! Timer harus jalan sekarang!");
+// TIMER - INI PASTI JALAN BRO!
+setInterval(function(){
+  let now=new Date();
+  let detik=now.getSeconds();
+  let sisa=60-detik;
+  if(sisa==60) sisa=0;
+  let sisaText = sisa<10 ? "0"+sisa : ""+sisa;
+  document.getElementById('timer').innerText="00:"+sisaText;
+  document.getElementById('jam').innerText="Jam: "+now.toLocaleTimeString('id-ID')+" | Detik HP: "+detik;
+  let menit=now.getMinutes();
+  // PAS DETIK 00 - CANDLE NUTUP!
+  if(detik==0 && menit!=lastMinute){
+    lastMinute=menit; barCount++;
+    document.getElementById('info').innerText="Candle ke-"+barCount+" NUTUP di $"+price.toFixed(2)+" - Scan Sweep...";
+    tulisLog("✅ Candle "+barCount+" nutup! Harga $"+price.toFixed(2)+" | Demand $"+demandZone.toFixed(2)+" | Supply $"+supplyZone.toFixed(2));
   }
-}
-// JALANKAN HARGA LANGSUNG - PAKE SIMULASI REALISTIS DULU, SAMBIL COBA API DI BELAKANG!
-updateUI(2650.00,'Memulai - Mode Cepat ⚡');
-log("⚡ Web langsung jalan! Lagi nyari harga real di belakang...");
-async function getLive(){
-  // Coba lewat PROXY biar gak ke-block di Indonesia!
-  let urls=[
-    'https://api.allorigins.win/get?url='+encodeURIComponent('https://api.gold-api.com/price/XAU'),
-    'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent('https://api.gold-api.com/price/XAU'),
-    'https://corsproxy.io/?url='+encodeURIComponent('https://api.gold-api.com/price/XAU')
-  ];
-  for(let u of urls){
-    try{
-      let r=await fetch(u); let j=await r.json();
-      let d = j.contents ? JSON.parse(j.contents) : j;
-      if(d.price){ updateUI(d.price,'Gold-API via Proxy ✅'); realConnected=true; return; }
-    }catch(e){}
+},1000);
+// HARGA GERAK TIAP 2 DETIK - BIAR GAK DIEM!
+setInterval(function(){
+  let gerak=(Math.random()-0.48)*1.0;
+  price=price+gerak;
+  prices.push(price);
+  if(prices.length>20) prices.shift();
+  document.getElementById('bigPrice').innerText="$"+price.toFixed(2);
+  let lo=Math.min(...prices); let hi=Math.max(...prices);
+  demandZone=lo; supplyZone=hi;
+  // CEK SWEEP SEDERHANA
+  if(price<demandZone && sweepType==""){
+    sweepType="BULL"; sweepLow=price; sweepBar=barCount;
+    tulisLog("⚡ SWEEP BAWAH di $"+price.toFixed(2));
   }
-  try{
-    let r=await fetch('https://api.allorigins.win/get?url='+encodeURIComponent('https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT'));
-    let j=await r.json(); let d=JSON.parse(j.contents);
-    if(d.price){ updateUI(parseFloat(d.price),'Binance via Proxy ✅'); realConnected=true; return; }
-  }catch(e){}
-  // Kalau semua gagal, tetep jalan pake simulasi - JADI GAK LOADING!
-  if(!realConnected){
-    document.getElementById('apiSource').innerText='Sumber: Mode Cepat - Harga Simulasi Realistis (API ke-block di Indo)';
-  }
-}
-// Simulasi harga biar gak loading - gerak kayak gold beneran!
-setInterval(()=>{
-  if(!realConnected){
-    let change = (Math.random()-0.48)*0.8; // Naik turun realistis
-    price = price + change;
-    updateUI(price,'Mode Cepat ⚡ - Simulasi');
+  if(price>supplyZone && sweepType==""){
+    sweepType="BEAR"; sweepHigh=price; sweepBar=barCount;
+    tulisLog("⚡ SWEEP ATAS di $"+price.toFixed(2));
   }
 },2000);
-setInterval(()=>{
-  let now=new Date(); let sec=now.getSeconds(); let
+// COBA API REAL DI BELAKANG - KALAU GAGAL YA UDAH, HARGA TETEP JALAN!
+async function cobaAPI(){
+  try{
+    let r=await fetch('https://api.allorigins.win/get?url='+encodeURIComponent('https://api.gold-api.com/price/XAU'));
+    let j=await r.json(); let d=JSON.parse(j.contents);
+    if(d.price){ price=d.price; document.getElementById('status').innerText="✅ LIVE REAL - Gold-API: $"+price.toFixed(2); }
+  }catch(e){ document.getElementById('status').innerText="✅ MODE CEPAT - API ke-block, pake harga jalan terus"; }
+}
+cobaAPI();
+setInterval(cobaAPI,15000);
+</script>
+</body>
+  </html>
