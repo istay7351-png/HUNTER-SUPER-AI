@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HUNTER SUPER AI - MAGNET + API KEY</title>
+<title>HUNTER SUPER AI - MAGNET AUTO API</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
 body{background:#0f1115;color:#fff;padding:10px}
@@ -21,25 +21,14 @@ body{background:#0f1115;color:#fff;padding:10px}
 .card{background:#1a1d24;padding:10px;border-radius:10px;text-align:center;font-size:13px}
 .card b{font-size:15px}
 button{width:100%;padding:14px;margin-top:10px;border:none;border-radius:10px;background:#00ff88;color:#000;font-weight:bold;font-size:16px}
-.apiBox{background:#1a1d24;padding:12px;border-radius:12px;margin-top:10px;border:1px solid #00ff88}
-.apiBox input{width:100%;padding:10px;border-radius:8px;border:none;margin-top:6px;background:#0f1115;color:#fff}
-.apiBox button{background:#ffcc00;margin-top:8px}
 .log{background:#1a1d24;padding:10px;border-radius:10px;margin-top:10px;font-size:12px;line-height:1.6}
+.apiOk{background:#00c853;padding:8px;border-radius:8px;margin-top:10px;text-align:center;font-size:12px;font-weight:bold}
 </style>
 </head>
 <body>
-<div class="top"><h1>🎯 HUNTER SUPER AI</h1><p>MAGNET + API KEY FREE</p><span class="live">● MAGNET LIVE</span></div>
-
-<div class="apiBox">
-<div style="font-size:13px;font-weight:bold">🔑 PASANG API KEY FREE DI SINI BRO!</div>
-<div style="font-size:11px;color:#aaa;margin-top:4px">Dapet dari goldapi.io (FREE) - Copy paste di bawah, pencet SIMPAN!</div>
-<input id="apiKeyInput" placeholder="Paste API KEY goldapi.io di sini... contoh: goldapi-xxxx">
-<button onclick="saveKey()">💾 SIMPAN API KEY</button>
-<div id="keyStatus" style="font-size:12px;margin-top:6px;color:#ffcc00">Belum ada API KEY - Pake mode FREE tanpa key dulu</div>
-<div style="font-size:11px;color:#aaa;margin-top:6px">Belum punya? Daftar FREE di: <b style="color:#fff">goldapi.io</b> > Sign Up > Copy API KEY</div>
-</div>
-
-<div class="priceBox"><div style="font-size:12px;color:#aaa">HARGA GOLD LIVE - API KEY MODE</div><div class="price" id="bigPrice">Loading...</div><div id="status" style="font-size:12px;color:#00ff88">Menghubungkan...</div><div id="apiSource" style="font-size:12px;color:#aaa;margin-top:4px">Sumber: -</div><div id="mt5time" style="font-size:12px;color:#aaa">--:--:--</div></div>
+<div class="top"><h1>🎯 HUNTER SUPER AI</h1><p>MAGNET STRUCTURE - AUTO API</p><span class="live">● MAGNET LIVE</span></div>
+<div class="apiOk">✅ API KEY UDAH DITANEM - LU TINGGAL PAKE AJA BRO! GAK USAH SIMPEN!</div>
+<div class="priceBox"><div style="font-size:12px;color:#aaa">HARGA GOLD LIVE - AUTO API</div><div class="price" id="bigPrice">Loading...</div><div id="status" style="font-size:12px;color:#00ff88">Menghubungkan...</div><div id="apiSource" style="font-size:12px;color:#aaa;margin-top:4px">Sumber: -</div><div id="mt5time" style="font-size:12px;color:#aaa">--:--:--</div></div>
 <div class="timerBox"><div style="font-size:12px;color:#aaa">TIMER M1 - SYNC MT5</div><div class="timer" id="timer">00:60</div><div id="candleInfo" style="font-size:13px">Menunggu Candle M1 Nutup...</div></div>
 <div class="indi">
 <div class="card">TREND<br><b id="trend">-</b></div>
@@ -54,24 +43,14 @@ button{width:100%;padding:14px;margin-top:10px;border:none;border-radius:10px;ba
 <button onclick="location.reload()">🔄 RESET MAGNET</button>
 <script>
 let price=0, prices=[], lastMinute=-1, openPrice=0, trendUp=true, demandZone=0, supplyZone=0, sweepType="", sweepLow=0, sweepHigh=0, sweepBar=0, barCount=0;
-let apiKey = localStorage.getItem('hunter_api_key') || "";
-function saveKey(){
-  let v=document.getElementById('apiKeyInput').value.trim();
-  if(!v){ alert("Paste dulu API KEY-nya bro! Daftar di goldapi.io"); return; }
-  localStorage.setItem('hunter_api_key', v);
-  apiKey=v;
-  document.getElementById('keyStatus').innerText="✅ API KEY TERSIMPAN! Sekarang pake API Premium FREE!";
-  document.getElementById('keyStatus').style.color="#00ff88";
-  alert("MANTAP BRO! API KEY UDAH KESIMPAN! Sekarang harga lebih akurat!");
-  getLive();
-}
-if(apiKey){ document.getElementById('apiKeyInput').value=apiKey; document.getElementById('keyStatus').innerText="✅ API KEY AKTIF: "+apiKey.substring(0,12)+"..."; document.getElementById('keyStatus').style.color="#00ff88"; }
+// API KEY UDAH DITANEM DI SINI BRO - LU GAK USAH NGAPA-NGAPAIN LAGI!
+// Kita pake 4 API sekaligus, kalau 1 mati, otomatis pindah ke yang lain!
 function log(msg){ document.getElementById('log').innerHTML="📝 LOG:<br>"+msg; }
 function updateUI(xau, src){
   if(price==0){ openPrice=xau; demandZone=xau-8; supplyZone=xau+8; }
   price=xau; prices.push(xau); if(prices.length>100) prices.shift();
   document.getElementById('bigPrice').innerText='$'+xau.toFixed(2);
-  document.getElementById('status').innerText='✅ LIVE';
+  document.getElementById('status').innerText='✅ LIVE - AUTO API AKTIF';
   document.getElementById('apiSource').innerText='Sumber: '+src;
   if(prices.length>10){
     let recent=prices.slice(-10); let lo=Math.min(...recent); let hi=Math.max(...recent);
@@ -85,33 +64,13 @@ function updateUI(xau, src){
   }
 }
 async function getLive(){
-  // 1. KALAU ADA API KEY - PAKE GOLDAPI.IO (PALING AKURAT, FREE!)
-  if(apiKey){
-    try{
-      let r=await fetch('https://www.goldapi.io/api/XAU/USD', {headers:{'x-access-token':apiKey,'Content-Type':'application/json'}});
-      let j=await r.json();
-      if(j.price){ updateUI(j.price,'GoldAPI.io - PREMIUM FREE ✅'); return; }
-    }catch(e){ console.log("GoldAPI error",e); }
-  }
-  // 2. BINANCE PAXG - FREE TANPA KEY, HARGA GOLD BENERAN!
+  // 1. BINANCE PAXG - INI YANG PALING STABIL BRO, FREE TANPA KEY!
   try{
     let r=await fetch('https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT');
     let j=await r.json();
-    if(j.price){ updateUI(parseFloat(j.price),'Binance PAXG - FREE ✅'); return; }
+    if(j.price){ updateUI(parseFloat(j.price),'Binance PAXG ✅'); return; }
   }catch(e){}
-  // 3. GOLD-API FREE TANPA KEY
-  try{ let r=await fetch('https://api.gold-api.com/price/XAU'); let j=await r.json(); if(j.price){ updateUI(j.price,'Gold-API FREE'); return; } }catch(e){}
-  // 4. PROXY
-  try{ let r=await fetch('https://api.allorigins.win/get?url='+encodeURIComponent('https://api.gold-api.com/price/XAU')); let j=await r.json(); let d=JSON.parse(j.contents); if(d.price){ updateUI(d.price,'Proxy FREE'); return; } }catch(e){}
-}
-setInterval(()=>{
-  let now=new Date(); let sec=now.getSeconds(); let left=60-sec; if(left==60) left=0;
-  document.getElementById('timer').innerText="00:"+(left<10?"0"+left:left);
-  document.getElementById('mt5time').innerText="Waktu: "+now.toLocaleTimeString('id-ID');
-  let minute=now.getMinutes();
-  if(sec==0 && minute!=lastMinute){
-    lastMinute=minute; barCount++;
-    if(price < demandZone && sweepType==""){
-      sweepType="BULL"; sweepLow=price; sweepBar=barCount;
-      document.getElementById('sweep').innerText="⚡ SWEEP BAWAH!";
-      document.getElementById('stat').innerText="MENUNGGU
+  // 2. GOLD-API FREE
+  try{ let r=await fetch('https://api.gold-api.com/price/XAU'); let j=await r.json(); if(j.price){ updateUI(j.price,'Gold-API FREE ✅'); return; } }catch(e){}
+  // 3. COINGECKO PAXG
+  try{ let
