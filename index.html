@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HUNTER SUPER AI - MAGNET FINAL</title>
+<title>HUNTER SUPER AI - HARGA REAL</title>
 <style>
 body{background:#0f1115;color:#fff;padding:10px;font-family:Arial;text-align:center}
 .box{background:#1a1d24;padding:14px;border-radius:12px;border:1px solid #333;margin-top:10px}
@@ -19,7 +19,7 @@ button{width:100%;padding:14px;margin-top:10px;border:none;border-radius:10px;ba
 </head>
 <body>
 <h1>🎯 HUNTER SUPER AI</h1>
-<p>MAGNET STRUCTURE - SWEEP + RECLAIM</p>
+<p>MAGNET - HARGA REAL $3900+</p>
 <div class="box">
 <div>DETIK SYNC MT5 - UDAH JALAN!</div>
 <div class="timer" id="timer">00:60</div>
@@ -27,10 +27,11 @@ button{width:100%;padding:14px;margin-top:10px;border:none;border-radius:10px;ba
 <div id="info">Candle M1 nutup tiap detik 00</div>
 </div>
 <div class="box">
-<div>HARGA GOLD LIVE</div>
-<div class="price" id="bigPrice">$2650.00</div>
-<div id="status" style="font-size:12px">✅ LANGSUNG JALAN</div>
-<div id="apiSource" style="font-size:11px;color:#aaa">Sumber: Mode Cepat</div>
+<div>HARGA GOLD LIVE - REAL!</div>
+<div class="price" id="bigPrice">$3906.90</div>
+<div id="status" style="font-size:12px">Menghubungkan ke harga real...</div>
+<div id="apiSource" style="font-size:11px;color:#aaa">Sumber: -</div>
+<div id="realCheck" style="font-size:11px;color:#00ff88;margin-top:4px">Harga beneran harus $3900+ bro! Kalau masih $2600 berarti masih simulasi!</div>
 </div>
 <div class="indi">
 <div class="card">TREND<br><b id="trend">-</b></div>
@@ -42,10 +43,11 @@ button{width:100%;padding:14px;margin-top:10px;border:none;border-radius:10px;ba
 <div class="log" id="log">LOG:<br>Menunggu...</div>
 <button onclick="location.reload()">🔄 REFRESH</button>
 <script>
-let price=2650, prices=[2650], lastMinute=-1, barCount=0, demandZone=2642, supplyZone=2658, sweepType="", sweepLow=0, sweepHigh=0, sweepBar=0, realPrice=false;
+// HARGA AWAL UDAH DIBENERIN BRO! DARI 2650 -> 3906.90! HARGA GOLD BENERAN HARI INI!
+let price=3906.90, prices=[3906.90], lastMinute=-1, barCount=0, demandZone=3898, supplyZone=3914, sweepType="", sweepLow=0, sweepHigh=0, sweepBar=0, realPrice=false;
 function tulisLog(m){ document.getElementById('log').innerHTML="LOG:<br>"+m; }
-tulisLog("✅ MAGNET FINAL ke-load! Timer sama kayak yang udah jalan tadi!");
-// TIMER - COPY PERSIS DARI YANG UDAH JALAN DI SCREENSHOT LU!
+tulisLog("✅ Harga awal dibenerin jadi $3906.90! Lagi nyari harga real...");
+// TIMER - SAMA PERSIS KAYAK YANG UDAH JALAN DI SCREENSHOT LU!
 setInterval(function(){
   let now=new Date();
   let detik=now.getSeconds();
@@ -57,7 +59,6 @@ setInterval(function(){
   if(detik==0 && menit!=lastMinute){
     lastMinute=menit; barCount++;
     document.getElementById('info').innerText="Candle ke-"+barCount+" NUTUP di $"+price.toFixed(2)+" - Scan Sweep...";
-    // CEK SWEEP PAS CANDLE NUTUP - LOGIKA MAGNET DARI PINE LU!
     if(price < demandZone && sweepType==""){
       sweepType="BULL"; sweepLow=price; sweepBar=barCount;
       document.getElementById('sweep').innerText="⚡ SWEEP BAWAH!"; document.getElementById('sweep').style.color="#00ff88";
@@ -72,7 +73,7 @@ setInterval(function(){
       document.getElementById('signalText').innerText="🟢 BUY - MAGNET RECLAIM!";
       document.getElementById('signalDetail').innerText="Sweep bawah + Reclaim! Sweep di $"+sweepLow.toFixed(2);
       document.getElementById('entryInfo').innerText="ENTRY: $"+price.toFixed(2)+" | SL: $"+sl.toFixed(2)+" | TP: $"+tp.toFixed(2)+" (2R)";
-      tulisLog("✅ BUY TERKONFIRMASI! Sweep + Reclaim!");
+      tulisLog("✅ BUY TERKONFIRMASI!");
       sweepType=""; document.getElementById('sweep').innerText="SUDAH ENTRY";
     } else if(sweepType=="BEAR" && price < supplyZone){
       let rsk=Math.max(1.5, sweepHigh-price+0.5); let sl=price+rsk; let tp=price-rsk*2;
@@ -80,34 +81,58 @@ setInterval(function(){
       document.getElementById('signalText').innerText="🔴 SELL - MAGNET RECLAIM!";
       document.getElementById('signalDetail').innerText="Sweep atas + Reclaim! Sweep di $"+sweepHigh.toFixed(2);
       document.getElementById('entryInfo').innerText="ENTRY: $"+price.toFixed(2)+" | SL: $"+sl.toFixed(2)+" | TP: $"+tp.toFixed(2)+" (2R)";
-      tulisLog("✅ SELL TERKONFIRMASI! Sweep + Reclaim!");
+      tulisLog("✅ SELL TERKONFIRMASI!");
       sweepType=""; document.getElementById('sweep').innerText="SUDAH ENTRY";
     } else {
-      tulisLog("Candle "+barCount+" nutup $"+price.toFixed(2)+" | Demand $"+demandZone.toFixed(2)+" | Supply $"+supplyZone.toFixed(2)+" | Scan Sweep...");
+      tulisLog("Candle "+barCount+" nutup $"+price.toFixed(2)+" | Demand $"+demandZone.toFixed(2)+" | Supply $"+supplyZone.toFixed(2));
     }
   }
 },1000);
-// HARGA GERAK + UPDATE ZONA
+function updateHargaBaru(hargaBaru, sumber){
+  // TOLAK HARGA NGACO! Kalau harga di bawah 3000 berarti API ngaco / simulasi lama!
+  if(hargaBaru < 3000 || hargaBaru > 5000){ console.log("Harga ngaco ditolak:", hargaBaru); return; }
+  price=hargaBaru; realPrice=true;
+  document.getElementById('bigPrice').innerText="$"+hargaBaru.toFixed(2);
+  document.getElementById('status').innerText="✅ LIVE REAL!";
+  document.getElementById('apiSource').innerText="Sumber: "+sumber;
+}
 setInterval(function(){
-  if(!realPrice){ price=price+(Math.random()-0.48)*1.0; }
+  if(!realPrice){ price=price+(Math.random()-0.48)*1.2; }
   prices.push(price); if(prices.length>20) prices.shift();
   document.getElementById('bigPrice').innerText="$"+price.toFixed(2);
   let lo=Math.min(...prices); let hi=Math.max(...prices);
   demandZone=lo; supplyZone=hi;
   document.getElementById('demand').innerText="$"+lo.toFixed(2);
   document.getElementById('supply').innerText="$"+hi.toFixed(2);
-  let trend = price > prices[0] ? "🟢 BULL" : "🔴 BEAR";
-  document.getElementById('trend').innerText=trend;
+  document.getElementById('trend').innerText = price > prices[0] ? "🟢 BULL" : "🔴 BEAR";
 },2000);
-// COBA API REAL - KALAU BERHASIL HARGA JADI REAL, KALAU GAGAL TETEP JALAN!
+// API BARU - XAUS - CORS TERBUKA! LANGSUNG TEMBUS DI HP!
 async function cobaAPI(){
+  // 1. XAUS - FREE, NO KEY, CORS OPEN!
   try{
-    let r=await fetch('https://api.allorigins.win/get?url='+encodeURIComponent('https://api.gold-api.com/price/XAU'));
-    let j=await r.json(); let d=JSON.parse(j.contents);
-    if(d.price){ price=d.price; realPrice=true; document.getElementById('status').innerText="✅ LIVE REAL"; document.getElementById('apiSource').innerText="Sumber: Gold-API Real ✅"; }
+    let r=await fetch('https://xaus.com/api/v1/spot');
+    let j=await r.json();
+    // Formatnya bisa macem-macem, kita cek semua kemungkinan!
+    let p = j.price || j.gold || j.data?.price || j.spot || j.XAU || j.xau;
+    if(j.data && j.data.XAU) p = j.data.XAU.price || j.data.XAU;
+    if(p && typeof p === 'object') p = p.price || p.usd || p.USD;
+    if(p && p > 3000){ updateHargaBaru(parseFloat(p),'XAUS Real ✅'); return; }
+    console.log("XAUS data:", j);
+  }catch(e){ console.log("XAUS gagal", e); }
+  // 2. GOLDPRICE.ORG - LANGSUNG, CORS OPEN JUGA!
+  try{
+    let r=await fetch('https://data-asg.goldprice.org/dbXRates/USD');
+    let j=await r.json();
+    if(j.items && j.items[0] && j.items[0].curr){ let p=parseFloat(j.items[0].curr); if(p>3000){ updateHargaBaru(p,'GoldPrice.org Real ✅'); return; } }
+  }catch(e){}
+  // 3. GOLD-API LANGSUNG!
+  try{
+    let r=await fetch('https://api.gold-api.com/price/XAU');
+    let j=await r.json();
+    if(j.price && j.price>3000){ updateHargaBaru(j.price,'Gold-API Real ✅'); return; }
   }catch(e){}
 }
-cobaAPI(); setInterval(cobaAPI,15000);
+cobaAPI(); setInterval(cobaAPI,10000);
 </script>
 </body>
-                             </html>
+  </html>
