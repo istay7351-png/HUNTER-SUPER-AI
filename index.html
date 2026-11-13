@@ -1,111 +1,380 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HUNTER SUPER AI - MT5 SYNC</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
-body{background:#0f1115;color:#fff;padding:10px}
-.top{background:#1a1d24;padding:12px;border-radius:12px;text-align:center;border:2px solid #00ff88}
-.top h1{font-size:22px;color:#00ff88}
-.live{display:inline-block;background:red;color:#fff;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:bold;margin-top:6px}
-.priceBox{background:#131722;border-radius:12px;margin-top:10px;padding:14px;text-align:center;border:1px solid #ffcc00}
-.priceBox .price{font-size:36px;font-weight:bold;color:#ffcc00}
-.timerBox{background:#1a1d24;padding:12px;border-radius:12px;margin-top:10px;text-align:center;border:1px solid #444}
-.timer{font-size:32px;font-weight:bold;color:#00ff88}
-.signalBox{padding:16px;border-radius:12px;margin-top:10px;text-align:center;display:none;border:2px solid #fff}
-.signalBox h2{font-size:26px}
-.lock{font-size:12px;background:#000;padding:4px 10px;border-radius:20px;display:inline-block;margin-top:6px}
-.indi{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-.card{background:#1a1d24;padding:10px;border-radius:10px;text-align:center;font-size:13px}
-.card b{font-size:16px}
-button{width:100%;padding:14px;margin-top:10px;border:none;border-radius:10px;background:#00ff88;color:#000;font-weight:bold;font-size:16px}
-.warn{background:#ff3b3b;padding:10px;border-radius:10px;margin-top:10px;font-size:12px;text-align:center}
-</style>
-</head>
-<body>
-<div class="top"><h1>🎯 HUNTER SUPER AI</h1><p>MT5 SYNC - NO REPAINT</p><span class="live">● SYNC MT5 LIVE</span></div>
-<div class="priceBox"><div style="font-size:12px;color:#aaa">HARGA GOLD LIVE - BROKER PRICE</div><div class="price" id="bigPrice">Loading...</div><div id="status" style="font-size:12px;color:#00ff88">Menghubungkan...</div><div id="mt5time" style="font-size:12px;color:#aaa;margin-top:5px">Waktu MT5: --:--:--</div></div>
-<div class="timerBox"><div style="font-size:12px;color:#aaa">TIMER CANDLE M1 - SAMA KAYAK MT5!</div><div class="timer" id="timer">00:60</div><div id="candleInfo" style="font-size:13px">Candle M1 Berjalan...</div><div style="font-size:11px;color:#ffcc00">Sinyal muncul di detik 00 - Pas Candle Nutup!</div></div>
-<div class="indi">
-<div class="card">RSI REAL<br><b id="rsi">-</b></div>
-<div class="card">HARGA OPEN<br><b id="open">-</b></div>
-<div class="card">HARGA NOW<br><b id="now">-</b></div>
-<div class="card">CANDLE MT5<br><b id="candle">-</b></div>
-<div class="card">SELISIH<br><b id="diff">-</b></div>
-<div class="card">ARAH<br><b id="arah">-</b></div>
-</div>
-<div id="signalBox" class="signalBox">
-<h2 id="signalText">MENUNGGU CANDLE NUTUP...</h2>
-<div id="signalDetail" style="font-size:14px;margin-top:6px"></div>
-<div class="lock">🔒 SINYAL DI-LOCK PAS CANDLE NUTUP - NO REPAINT</div>
-<div id="entryInfo" style="font-size:13px;margin-top:8px"></div>
-</div>
-<div class="warn">⚠️ PERHATIAN: Harga web beda 0.5 - 2$ sama MT5 karena SPREAD BROKER! Itu normal bro! Jangan entry kalau beda jauh!</div>
-<button onclick="location.reload()">🔄 SYNC ULANG KE MT5</button>
-<script>
-let price=0, openPrice=0, lastMinute=-1, locked=false;
-function updateUI(xau, src){ 
-  if(price==0) openPrice=xau;
-  price=xau; 
-  document.getElementById('bigPrice').innerText='$'+xau.toFixed(2); 
-  document.getElementById('status').innerText='✅ LIVE - '+src; 
-  document.getElementById('now').innerText='$'+xau.toFixed(2);
-  document.getElementById('open').innerText='$'+openPrice.toFixed(2);
-  let diff = xau - openPrice;
-  document.getElementById('diff').innerText = (diff>=0?'+':'')+diff.toFixed(2);
-  document.getElementById('diff').style.color = diff>=0?'#00ff88':'#ff3b3b';
-  let arah = diff>=0 ? '🟢 HIJAU - NAIK' : '🔴 MERAH - TURUN';
-  document.getElementById('candle').innerText = arah;
-  document.getElementById('arah').innerText = arah;
-  // RSI REAL dari pergerakan harga
-  let rsi = 50 + (diff*5);
-  if(rsi>90) rsi=90; if(rsi<10) rsi=10;
-  document.getElementById('rsi').innerText = rsi.toFixed(0);
-}
-async function getLive(){
-  try{ let r=await fetch('https://api.gold-api.com/price/XAU'); let j=await r.json(); if(j.price){ updateUI(j.price,'Gold-API'); return; } }catch(e){}
-  try{ let r=await fetch('https://api.allorigins.win/get?url='+encodeURIComponent('https://api.gold-api.com/price/XAU')); let j=await r.json(); let d=JSON.parse(j.contents); if(d.price){ updateUI(d.price,'Proxy LIVE'); return; } }catch(e){}
-}
-// TIMER SYNC MT5 - INI KUNCINYA BRO!
-setInterval(()=>{
-  let now = new Date();
-  // MT5 broker biasanya GMT+2 / GMT+3, kita pake waktu HP lu biar sama kayak jam MT5 di HP
-  let sec = now.getSeconds();
-  let left = 60 - sec;
-  if(left==60) left=0;
-  let s = left<10 ? "0"+left : left;
-  document.getElementById('timer').innerText = "00:"+s;
-  document.getElementById('mt5time').innerText = "Waktu HP: "+now.toLocaleTimeString('id-ID')+" | Candle M1 nutup tiap detik 00";
+//@version=6
+// Magnet Structure Strategy
+// Trades sweeps of swing liquidity zones (or range springs / UTADs) that close back through the level,
+// in the direction of market structure. SL beyond the sweep, TP at the next opposing zone.
+strategy("Magnet Structure Strategy", "MSS", overlay = true,
+     max_boxes_count = 200, max_lines_count = 300, max_labels_count = 300,
+     initial_capital = 10000, default_qty_type = strategy.percent_of_equity, default_qty_value = 30,
+     commission_type = strategy.commission.percent, commission_value = 0.05,
+     process_orders_on_close = true)
+
+// ── Inputs ──
+gA = "1 · Zones & structure"
+pivLen   = input.int(5, "Swing length", minval = 2, maxval = 30, group = gA)
+atrLen   = input.int(14, "ATR length", minval = 1, group = gA)
+zoneATR  = input.float(0.5, "Zone height (× ATR)", minval = 0.1, step = 0.05, group = gA)
+maxZones = input.int(5, "Max live zones per side", minval = 1, maxval = 15, group = gA)
+
+gB = "2 · Signals"
+sigWin    = input.int(6, "Reclaim within (bars after sweep)", minval = 1, maxval = 30, group = gB)
+useSpring = input.bool(true, "Spring / UTAD of the range", group = gB)
+rangeLen  = input.int(40, "Range lookback (bars)", minval = 10, maxval = 300, group = gB)
+gateMode  = input.string("With structure", "Trend gate", options = ["With structure", "Any"], group = gB,
+     tooltip = "With structure: longs only while the last structure break was bullish, shorts only while bearish.")
+useMom    = input.bool(false, "Momentum filter (oscillator above / below 50)", group = gB)
+momLen    = input.int(14, "Momentum length", minval = 2, group = gB)
+momSmooth = input.int(10, "Momentum smoothing", minval = 1, group = gB)
+cooldown  = input.int(5, "Cooldown after a trade (bars)", minval = 0, group = gB)
+
+gC = "3 · Risk & targets"
+slPad   = input.float(0.15, "SL pad beyond sweep extreme (× ATR)", minval = 0.0, step = 0.05, group = gC)
+minRisk = input.float(0.4, "Min risk (× ATR)", minval = 0.1, step = 0.1, group = gC)
+maxRisk = input.float(2.5, "Max risk (× ATR)", minval = 0.3, step = 0.1, group = gC)
+minRR   = input.float(1.2, "Min R to use a zone as target", minval = 0.5, step = 0.1, group = gC)
+defRR   = input.float(2.0, "Default target (R)", minval = 0.5, step = 0.5, group = gC)
+maxRR   = input.float(5.0, "Max target (R)", minval = 1.0, step = 0.5, group = gC)
+maxHold = input.int(60, "Timeout (bars)", minval = 5, group = gC)
+
+gD = "4 · Visuals"
+tintBars   = input.bool(true, "Color candles by trend", group = gD)
+showBand   = input.bool(true, "Trend band + glow", group = gD)
+bandLen    = input.int(28, "Band length", minval = 2, group = gD)
+bandMult   = input.float(1.0, "Band width", minval = 0.1, step = 0.05, group = gD)
+showZones  = input.bool(true, "Liquidity zones", group = gD)
+showSwept  = input.bool(false, "Keep swept zones (faded)", group = gD)
+showBOS    = input.bool(true, "Structure break lines", group = gD)
+showSweep  = input.bool(true, "Sweep marks", group = gD)
+showTicket = input.bool(true, "Entry / SL / TP tickets", group = gD)
+showTbl    = input.bool(true, "Stats panel", group = gD)
+cBull = input.color(#00a67e, "Bull color", group = gD)
+cBear = input.color(#b4004e, "Bear color", group = gD)
+cGrey = input.color(#B2B5BE, "Swept zone color", group = gD)
+cTp   = input.color(#4caf50, "TP color", group = gD)
+cSl   = input.color(#e53935, "SL color", group = gD)
+
+// ── Base series ──
+float atr   = ta.atr(atrLen)
+float zoneH = atr * zoneATR
+float ph    = ta.pivothigh(high, pivLen, pivLen)
+float pl    = ta.pivotlow(low, pivLen, pivLen)
+
+// momentum oscillator (0–100)
+float roc = ta.change(close, momLen)
+float vol = ta.stdev(ta.change(close), momLen)
+float raw = vol != 0 ? roc / vol : 0.0
+float osc = ta.ema(100 / (1 + math.exp(-raw)), momSmooth)
+
+// ── Market structure ──
+var bool  isUp  = false
+var float hiP   = na
+var int   hiIdx = na
+var float loP   = na
+var int   loIdx = na
+
+if not na(ph)
+    hiP := ph
+    hiIdx := bar_index - pivLen
+if not na(pl)
+    loP := pl
+    loIdx := bar_index - pivLen
+
+bool brkUp = ta.crossover(close, hiP)
+bool brkDn = ta.crossunder(close, loP)
+
+if brkUp
+    bool choch = not isUp
+    if showBOS
+        line.new(hiIdx, hiP, bar_index, hiP, color = color.new(cBull, 40), width = 1, style = line.style_dotted)
+        if choch
+            label.new(int(math.avg(hiIdx, bar_index)), hiP, "CHoCH", style = label.style_label_down, color = color(na), textcolor = color.new(chart.fg_color, 50), size = size.tiny)
+    isUp := true
+    hiP := na
+if brkDn
+    bool choch = isUp
+    if showBOS
+        line.new(loIdx, loP, bar_index, loP, color = color.new(cBear, 40), width = 1, style = line.style_dotted)
+        if choch
+            label.new(int(math.avg(loIdx, bar_index)), loP, "CHoCH", style = label.style_label_up, color = color(na), textcolor = color.new(chart.fg_color, 50), size = size.tiny)
+    isUp := false
+    loP := na
+
+// ── Liquidity zones ──
+type Zone
+    float lvl
+    int   side   // 1 = demand, -1 = supply
+    box   bx
+
+var array<Zone> demand = array.new<Zone>()
+var array<Zone> supply = array.new<Zone>()
+
+addZone(float lvl, int side) =>
+    array<Zone> arr = side == 1 ? demand : supply
+    bool merged = false
+    if arr.size() > 0
+        for i = 0 to arr.size() - 1
+            Zone z = arr.get(i)
+            if math.abs(z.lvl - lvl) <= 0.3 * atr
+                z.lvl := (z.lvl + lvl) / 2
+                if not na(z.bx)
+                    z.bx.set_top(z.lvl + zoneH / 2)
+                    z.bx.set_bottom(z.lvl - zoneH / 2)
+                merged := true
+                break
+    if not merged
+        color c = side == 1 ? cBull : cBear
+        box b = showZones ? box.new(bar_index - pivLen, lvl + zoneH / 2, bar_index, lvl - zoneH / 2, border_color = color(na), bgcolor = color.new(c, 88), extend = extend.right) : na
+        arr.push(Zone.new(lvl, side, b))
+        while arr.size() > maxZones
+            Zone old = arr.shift()
+            if not na(old.bx)
+                old.bx.delete()
+    merged
+
+// nearest opposing zone edge at least minDist away
+nearestTarget(int dir, float minDist) =>
+    float best = na
+    array<Zone> arr = dir == 1 ? supply : demand
+    if arr.size() > 0
+        for i = 0 to arr.size() - 1
+            Zone z = arr.get(i)
+            float edge = dir == 1 ? z.lvl - zoneH / 2 : z.lvl + zoneH / 2
+            float d = (edge - close) * dir
+            if d >= minDist
+                if na(best) or d < (best - close) * dir
+                    best := edge
+    best
+
+if barstate.isconfirmed and not na(atr)
+    if not na(ph)
+        addZone(ph, -1)
+    if not na(pl)
+        addZone(pl, 1)
+
+// ── Sweep detection ──
+var int   bullSwBar  = na
+var float bullSwLow  = na
+var float bullSwLvl  = na
+var int   bearSwBar  = na
+var float bearSwHigh = na
+var float bearSwLvl  = na
+
+if barstate.isconfirmed and not na(atr)
+    // zone sweeps
+    if demand.size() > 0
+        for i = demand.size() - 1 to 0
+            Zone z = demand.get(i)
+            if low < z.lvl - zoneH / 2
+                if na(bullSwBar) or bar_index - bullSwBar > sigWin
+                    bullSwBar := bar_index
+                    bullSwLow := low
+                    bullSwLvl := z.lvl + zoneH / 2
+                else
+                    bullSwLow := math.min(bullSwLow, low)
+                if not na(z.bx)
+                    if showSwept
+                        z.bx.set_extend(extend.none)
+                        z.bx.set_right(bar_index)
+                        z.bx.set_bgcolor(color.new(cGrey, 92))
+                    else
+                        z.bx.delete()
+                demand.remove(i)
+                if showSweep
+                    label.new(bar_index, low, "⚡", yloc = yloc.belowbar, style = label.style_none, textcolor = cBull, size = size.normal)
+    if supply.size() > 0
+        for i = supply.size() - 1 to 0
+            Zone z = supply.get(i)
+            if high > z.lvl + zoneH / 2
+                if na(bearSwBar) or bar_index - bearSwBar > sigWin
+                    bearSwBar := bar_index
+                    bearSwHigh := high
+                    bearSwLvl := z.lvl - zoneH / 2
+                else
+                    bearSwHigh := math.max(bearSwHigh, high)
+                if not na(z.bx)
+                    if showSwept
+                        z.bx.set_extend(extend.none)
+                        z.bx.set_right(bar_index)
+                        z.bx.set_bgcolor(color.new(cGrey, 92))
+                    else
+                        z.bx.delete()
+                supply.remove(i)
+                if showSweep
+                    label.new(bar_index, high, "⚡", yloc = yloc.abovebar, style = label.style_none, textcolor = cBear, size = size.normal)
+
+    // spring / UTAD: break of the range extreme that closes back inside
+    float rLo = ta.lowest(low, rangeLen)[1]
+    float rHi = ta.highest(high, rangeLen)[1]
+    if useSpring and low < rLo and close > rLo
+        if na(bullSwBar) or bar_index - bullSwBar > sigWin
+            bullSwBar := bar_index
+            bullSwLow := low
+            bullSwLvl := rLo
+        else
+            bullSwLow := math.min(bullSwLow, low)
+        if showSweep
+            label.new(bar_index, low, "SPRING", yloc = yloc.belowbar, style = label.style_label_up, color = color.new(cBull, 40), textcolor = color.white, size = size.tiny)
+    if useSpring and high > rHi and close < rHi
+        if na(bearSwBar) or bar_index - bearSwBar > sigWin
+            bearSwBar := bar_index
+            bearSwHigh := high
+            bearSwLvl := rHi
+        else
+            bearSwHigh := math.max(bearSwHigh, high)
+        if showSweep
+            label.new(bar_index, high, "UTAD", yloc = yloc.abovebar, style = label.style_label_down, color = color.new(cBear, 40), textcolor = color.white, size = size.tiny)
+
+    // track the sweep extreme while the setup is pending
+    if not na(bullSwBar) and bar_index > bullSwBar and bar_index - bullSwBar <= sigWin
+        bullSwLow := math.min(bullSwLow, low)
+    if not na(bearSwBar) and bar_index > bearSwBar and bar_index - bearSwBar <= sigWin
+        bearSwHigh := math.max(bearSwHigh, high)
+
+// ── Entries ──
+var int   lastExit = -100000
+var int   tkDir    = 0
+var float tkEntry  = na
+var float tkSl     = na
+var float tkTp     = na
+var float tkR      = na
+var int   tkBar    = na
+var box   rBox     = na
+var box   pBox     = na
+var line  eLn      = na
+var line  sLn      = na
+var line  tLn      = na
+
+bool closedNow = strategy.closedtrades > strategy.closedtrades[1]
+if closedNow
+    lastExit := bar_index
+
+bool flat      = strategy.position_size == 0
+bool coolOk    = bar_index - lastExit >= cooldown
+bool gateLong  = (gateMode == "Any" or isUp) and (not useMom or osc > 50)
+bool gateShort = (gateMode == "Any" or not isUp) and (not useMom or osc < 50)
+
+bool longSig  = barstate.isconfirmed and flat and coolOk and not na(atr) and not na(bullSwBar) and bar_index - bullSwBar <= sigWin and close > bullSwLvl and close > open and gateLong
+bool shortSig = barstate.isconfirmed and flat and coolOk and not na(atr) and not na(bearSwBar) and bar_index - bearSwBar <= sigWin and close < bearSwLvl and close < open and gateShort and not longSig
+
+// draws the ticket and returns the drawings
+drawTicket(float sl, float tp) =>
+    line eL = na
+    line sL = na
+    line tL = na
+    box  rB = na
+    box  pB = na
+    if showTicket
+        eL := line.new(bar_index, close, bar_index + 1, close, color = color.new(chart.fg_color, 40))
+        sL := line.new(bar_index, sl, bar_index + 1, sl, color = color.new(cSl, 20), style = line.style_dashed)
+        tL := line.new(bar_index, tp, bar_index + 1, tp, color = color.new(cTp, 20), style = line.style_dashed)
+        rB := box.new(bar_index, math.max(close, sl), bar_index + 1, math.min(close, sl), border_color = color(na), bgcolor = color.new(cSl, 94))
+        pB := box.new(bar_index, math.max(close, tp), bar_index + 1, math.min(close, tp), border_color = color(na), bgcolor = color.new(cTp, 94))
+    [eL, sL, tL, rB, pB]
+
+if longSig
+    float rsk = math.max(minRisk * atr, math.min(maxRisk * atr, close - (bullSwLow - slPad * atr)))
+    float sl  = close - rsk
+    float mg  = nearestTarget(1, minRR * rsk)
+    float tp  = na(mg) ? close + defRR * rsk : math.min(mg - 0.1 * atr, close + maxRR * rsk)
+    strategy.entry("Long", strategy.long)
+    strategy.exit("Long exit", "Long", stop = sl, limit = tp)
+    tkDir := 1
+    tkEntry := close
+    tkSl := sl
+    tkTp := tp
+    tkR := rsk
+    tkBar := bar_index
+    [e1, s1, t1, r1, p1] = drawTicket(sl, tp)
+    eLn := e1
+    sLn := s1
+    tLn := t1
+    rBox := r1
+    pBox := p1
+    label.new(bar_index, low, "BUY " + str.tostring((tp - close) / rsk, "0.0") + "R", yloc = yloc.belowbar, style = label.style_label_up, color = cBull, textcolor = color.white, size = size.tiny)
+    bullSwBar := na
+
+if shortSig
+    float rsk = math.max(minRisk * atr, math.min(maxRisk * atr, (bearSwHigh + slPad * atr) - close))
+    float sl  = close + rsk
+    float mg  = nearestTarget(-1, minRR * rsk)
+    float tp  = na(mg) ? close - defRR * rsk : math.max(mg + 0.1 * atr, close - maxRR * rsk)
+    strategy.entry("Short", strategy.short)
+    strategy.exit("Short exit", "Short", stop = sl, limit = tp)
+    tkDir := -1
+    tkEntry := close
+    tkSl := sl
+    tkTp := tp
+    tkR := rsk
+    tkBar := bar_index
+    [e2, s2, t2, r2, p2] = drawTicket(sl, tp)
+    eLn := e2
+    sLn := s2
+    tLn := t2
+    rBox := r2
+    pBox := p2
+    label.new(bar_index, high, "SELL " + str.tostring((close - tp) / rsk, "0.0") + "R", yloc = yloc.abovebar, style = label.style_label_down, color = cBear, textcolor = color.white, size = size.tiny)
+    bearSwBar := na
+
+// timeout
+if strategy.position_size != 0 and not na(tkBar) and bar_index - tkBar >= maxHold
+    strategy.close_all("Timeout")
+
+// extend ticket drawings and label the result on close
+if not na(rBox) and (strategy.position_size != 0 or closedNow)
+    eLn.set_x2(bar_index)
+    sLn.set_x2(bar_index)
+    tLn.set_x2(bar_index)
+    rBox.set_right(bar_index)
+    pBox.set_right(bar_index)
+
+if closedNow and not na(tkR) and showTicket
+    int idx = strategy.closedtrades - 1
+    float ex = strategy.closedtrades.exit_price(idx)
+    float r = tkDir * (ex - tkEntry) / tkR
+    label.new(bar_index, ex, (r >= 0 ? "+" : "") + str.tostring(r, "0.0") + "R", style = tkDir == 1 ? (r >= 0 ? label.style_label_down : label.style_label_up) : (r >= 0 ? label.style_label_up : label.style_label_down), color = color.new(r >= 0 ? cTp : cSl, 25), textcolor = color.white, size = size.tiny)
+
+// ── Trend candles, band and glow ──
+float bEma = ta.ema(close, bandLen)
+float bSum = 0.0
+for i = 0 to bandLen - 1
+    bSum += math.pow(close[i] - bEma[i], 2)
+float bRmsd  = math.sqrt(bSum / bandLen)
+float bUpper = bEma + bRmsd * bandMult
+float bLower = bEma - bRmsd * bandMult
+float bSma   = ta.sma(close, 10)
+
+color sigCol = isUp ? cBull : cBear
+
+plotcandle(open, high, low, close, "Trend candles",
+     tintBars ? sigCol : na, tintBars ? sigCol : na, bordercolor = tintBars ? sigCol : na,
+     display = display.all - display.status_line - display.price_scale)
+
+plot(showBand and not isUp ? bUpper : na, "Upper band", cBear, 2, plot.style_linebr)
+plot(showBand and isUp ? bLower : na, "Lower band", cBull, 2, plot.style_linebr)
+plot(showBand ? bEma : na, "EMA", color.new(sigCol, 40))
+
+color gUpCol = isUp ? color.new(color.black, 100) : color.new(cBear, 40)
+color gLoCol = isUp ? color.new(cBull, 40) : color.new(color.black, 100)
+float gUp = isUp ? bSma : bUpper
+float gLo = isUp ? bLower : bSma
+upperPlot = plot(showBand ? (isUp ? bSma : bUpper) : na, "Upper glow", color = na)
+lowerPlot = plot(showBand ? (isUp ? bLower : bSma) : na, "Lower glow", color = na)
+fill(upperPlot, lowerPlot, gUp, gLo, gUpCol, gLoCol)
+
+// ── Stats panel ──
+var table tb = table.new(position.top_right, 2, 5, bgcolor = color.new(color.black, 35), border_width = 0)
+if barstate.islast and showTbl
+    int n = strategy.closedtrades
+    float gp = strategy.grossprofit
+    float gl = math.abs(strategy.grossloss)
+    tb.cell(0, 0, "Trend", text_color = color.gray, text_size = size.small)
+    tb.cell(1, 0, isUp ? "BULL" : "BEAR", text_color = isUp ? cBull : cBear, text_size = size.small)
+    tb.cell(0, 1, "Trades", text_color = color.gray, text_size = size.small)
+    tb.cell(1, 1, str.tostring(n), text_color = color.white, text_size = size.small)
+    tb.cell(0, 2, "Win rate", text_color = color.gray, text_size = size.small)
+    tb.cell(1, 2, n > 0 ? str.tostring(100.0 * strategy.wintrades / n, "0") + "%" : "—", text_color = color.white, text_size = size.small)
+    tb.cell(0, 3, "Profit factor", text_color = color.gray, text_size = size.small)
+    tb.cell(1, 3, gl > 0 ? str.tostring(gp / gl, "0.00") : "—", text_color = color.white, text_size = size.small)
+    tb.cell(0, 4, "Net profit", text_color = color.gray, text_size = size.small)
+    tb.cell(1, 4, str.tostring(strategy.netprofit, "0.00"), text_color = strategy.netprofit >= 0 ? cTp : cSl, text_size = size.small)
+
   
-  // PAS CANDLE NUTUP (detik 00) -> KUNCI SINYAL DARI HARGA BENERAN!
-  let minute = now.getMinutes();
-  if(sec==0 && minute!=lastMinute){
-    lastMinute=minute;
-    // Sinyal dari HARGA BENERAN, bukan random lagi!
-    let diff = price - openPrice;
-    let box=document.getElementById('signalBox'); box.style.display='block';
-    if(diff > 1.5){ // Naik kuat
-      box.style.background="#00c853";
-      document.getElementById('signalText').innerText="🟢 BUY - CANDLE HIJAU KUAT!";
-      document.getElementById('signalDetail').innerText="Harga naik +"+diff.toFixed(2)+"$ di candle ini. MT5 juga harusnya HIJAU bro!";
-      document.getElementById('entryInfo').innerText='ENTRY: $'+price.toFixed(2)+' | TP: $'+(price+8).toFixed(2)+' | SL: $'+(price-5).toFixed(2);
-    } else if(diff < -1.5){ // Turun kuat
-      box.style.background="#ff3b3b";
-      document.getElementById('signalText').innerText="🔴 SELL - CANDLE MERAH KUAT!";
-      document.getElementById('signalDetail').innerText="Harga turun "+diff.toFixed(2)+"$ di candle ini. MT5 juga harusnya MERAH bro!";
-      document.getElementById('entryInfo').innerText='ENTRY: $'+price.toFixed(2)+' | TP: $'+(price-8).toFixed(2)+' | SL: $'+(price+5).toFixed(2);
-    } else {
-      box.style.background="#333";
-      document.getElementById('signalText').innerText="⏳ WAIT - CANDLE LEMAH / SIDEWAYS";
-      document.getElementById('signalDetail').innerText="Harga cuma gerak "+diff.toFixed(2)+"$ - Jangan entry bro, tunggu candle kuat!";
-      document.getElementById('entryInfo').innerText='Jangan entry, candle doji / lemah!';
-    }
-    openPrice = price; // Reset open untuk candle baru
-  }
-},1000);
-getLive(); setInterval(getLive,3000);
-</script>
-</body>
-  </html>
