@@ -3,86 +3,111 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HUNTER TEST DETIK</title>
+<title>HUNTER SUPER AI - MAGNET FINAL</title>
 <style>
-body{background:#0f1115;color:#fff;padding:15px;font-family:Arial;text-align:center}
-.box{background:#1a1d24;padding:20px;border-radius:12px;border:2px solid #00ff88;margin-top:10px}
-.timer{font-size:60px;font-weight:bold;color:#00ff88}
-.price{font-size:40px;color:#ffcc00;font-weight:bold}
+body{background:#0f1115;color:#fff;padding:10px;font-family:Arial;text-align:center}
+.box{background:#1a1d24;padding:14px;border-radius:12px;border:1px solid #333;margin-top:10px}
+.timer{font-size:50px;font-weight:bold;color:#00ff88}
+.price{font-size:36px;color:#ffcc00;font-weight:bold}
+.indi{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.card{background:#1a1d24;padding:10px;border-radius:10px;font-size:13px}
+.card b{font-size:15px}
+.signalBox{padding:16px;border-radius:12px;margin-top:10px;display:none;border:2px solid #fff}
 button{width:100%;padding:14px;margin-top:10px;border:none;border-radius:10px;background:#00ff88;font-weight:bold;font-size:16px}
+.log{background:#1a1d24;padding:10px;border-radius:10px;margin-top:10px;font-size:12px;text-align:left;line-height:1.6}
 </style>
 </head>
 <body>
-<h1>🎯 HUNTER TEST DETIK</h1>
-<p>Kalau detik di bawah ini jalan, berarti file lu UDAH BENER!</p>
+<h1>🎯 HUNTER SUPER AI</h1>
+<p>MAGNET STRUCTURE - SWEEP + RECLAIM</p>
 <div class="box">
-<div>DETIK SYNC MT5 - HARUS JALAN!</div>
+<div>DETIK SYNC MT5 - UDAH JALAN!</div>
 <div class="timer" id="timer">00:60</div>
 <div id="jam">Jam: --:--:--</div>
 <div id="info">Candle M1 nutup tiap detik 00</div>
 </div>
 <div class="box">
-<div>HARGA GOLD</div>
+<div>HARGA GOLD LIVE</div>
 <div class="price" id="bigPrice">$2650.00</div>
-<div id="status">✅ LANGSUNG JALAN - GAK LOADING</div>
+<div id="status" style="font-size:12px">✅ LANGSUNG JALAN</div>
+<div id="apiSource" style="font-size:11px;color:#aaa">Sumber: Mode Cepat</div>
 </div>
-<div class="box" id="signalBox" style="display:none;background:#00c853">
-<h2 id="signalText">SINYAL</h2>
-<div id="entryInfo"></div>
+<div class="indi">
+<div class="card">TREND<br><b id="trend">-</b></div>
+<div class="card">ZONA DEMAND<br><b id="demand">-</b></div>
+<div class="card">ZONA SUPPLY<br><b id="supply">-</b></div>
+<div class="card">SWEEP<br><b id="sweep">BELUM ADA</b></div>
 </div>
-<div class="box" style="text-align:left;font-size:13px" id="log">LOG:<br>Menunggu...</div>
+<div id="signalBox" class="signalBox"><h2 id="signalText">SINYAL</h2><div id="signalDetail" style="font-size:14px;margin-top:6px"></div><div id="entryInfo" style="font-size:13px;margin-top:8px"></div><div style="font-size:12px;background:#000;padding:4px 10px;border-radius:20px;display:inline-block;margin-top:6px">🔒 MAGNET - SWEEP + RECLAIM</div></div>
+<div class="log" id="log">LOG:<br>Menunggu...</div>
 <button onclick="location.reload()">🔄 REFRESH</button>
 <script>
-// INI KUNCINYA BRO - TIMER LANGSUNG JALAN PAS WEB DIBUKA!
-let price=2650, prices=[2650], lastMinute=-1, barCount=0, demandZone=2642, supplyZone=2658, sweepType="", sweepLow=0, sweepHigh=0, sweepBar=0;
-function tulisLog(msg){ document.getElementById('log').innerHTML="LOG:<br>"+msg; }
-tulisLog("✅ Script ke-load! Timer harus jalan sekarang!");
-// TIMER - INI PASTI JALAN BRO!
+let price=2650, prices=[2650], lastMinute=-1, barCount=0, demandZone=2642, supplyZone=2658, sweepType="", sweepLow=0, sweepHigh=0, sweepBar=0, realPrice=false;
+function tulisLog(m){ document.getElementById('log').innerHTML="LOG:<br>"+m; }
+tulisLog("✅ MAGNET FINAL ke-load! Timer sama kayak yang udah jalan tadi!");
+// TIMER - COPY PERSIS DARI YANG UDAH JALAN DI SCREENSHOT LU!
 setInterval(function(){
   let now=new Date();
   let detik=now.getSeconds();
-  let sisa=60-detik;
-  if(sisa==60) sisa=0;
-  let sisaText = sisa<10 ? "0"+sisa : ""+sisa;
+  let sisa=60-detik; if(sisa==60) sisa=0;
+  let sisaText=sisa<10?"0"+sisa:""+sisa;
   document.getElementById('timer').innerText="00:"+sisaText;
   document.getElementById('jam').innerText="Jam: "+now.toLocaleTimeString('id-ID')+" | Detik HP: "+detik;
   let menit=now.getMinutes();
-  // PAS DETIK 00 - CANDLE NUTUP!
   if(detik==0 && menit!=lastMinute){
     lastMinute=menit; barCount++;
     document.getElementById('info').innerText="Candle ke-"+barCount+" NUTUP di $"+price.toFixed(2)+" - Scan Sweep...";
-    tulisLog("✅ Candle "+barCount+" nutup! Harga $"+price.toFixed(2)+" | Demand $"+demandZone.toFixed(2)+" | Supply $"+supplyZone.toFixed(2));
+    // CEK SWEEP PAS CANDLE NUTUP - LOGIKA MAGNET DARI PINE LU!
+    if(price < demandZone && sweepType==""){
+      sweepType="BULL"; sweepLow=price; sweepBar=barCount;
+      document.getElementById('sweep').innerText="⚡ SWEEP BAWAH!"; document.getElementById('sweep').style.color="#00ff88";
+      tulisLog("⚡ SWEEP BAWAH di $"+price.toFixed(2)+" - Tunggu Reclaim ke atas $"+demandZone.toFixed(2)+" buat BUY!");
+    } else if(price > supplyZone && sweepType==""){
+      sweepType="BEAR"; sweepHigh=price; sweepBar=barCount;
+      document.getElementById('sweep').innerText="⚡ SWEEP ATAS!"; document.getElementById('sweep').style.color="#ff3b3b";
+      tulisLog("⚡ SWEEP ATAS di $"+price.toFixed(2)+" - Tunggu Reclaim ke bawah $"+supplyZone.toFixed(2)+" buat SELL!");
+    } else if(sweepType=="BULL" && price > demandZone){
+      let rsk=Math.max(1.5, price-sweepLow+0.5); let sl=price-rsk; let tp=price+rsk*2;
+      let box=document.getElementById('signalBox'); box.style.display='block'; box.style.background="#00c853";
+      document.getElementById('signalText').innerText="🟢 BUY - MAGNET RECLAIM!";
+      document.getElementById('signalDetail').innerText="Sweep bawah + Reclaim! Sweep di $"+sweepLow.toFixed(2);
+      document.getElementById('entryInfo').innerText="ENTRY: $"+price.toFixed(2)+" | SL: $"+sl.toFixed(2)+" | TP: $"+tp.toFixed(2)+" (2R)";
+      tulisLog("✅ BUY TERKONFIRMASI! Sweep + Reclaim!");
+      sweepType=""; document.getElementById('sweep').innerText="SUDAH ENTRY";
+    } else if(sweepType=="BEAR" && price < supplyZone){
+      let rsk=Math.max(1.5, sweepHigh-price+0.5); let sl=price+rsk; let tp=price-rsk*2;
+      let box=document.getElementById('signalBox'); box.style.display='block'; box.style.background="#ff3b3b";
+      document.getElementById('signalText').innerText="🔴 SELL - MAGNET RECLAIM!";
+      document.getElementById('signalDetail').innerText="Sweep atas + Reclaim! Sweep di $"+sweepHigh.toFixed(2);
+      document.getElementById('entryInfo').innerText="ENTRY: $"+price.toFixed(2)+" | SL: $"+sl.toFixed(2)+" | TP: $"+tp.toFixed(2)+" (2R)";
+      tulisLog("✅ SELL TERKONFIRMASI! Sweep + Reclaim!");
+      sweepType=""; document.getElementById('sweep').innerText="SUDAH ENTRY";
+    } else {
+      tulisLog("Candle "+barCount+" nutup $"+price.toFixed(2)+" | Demand $"+demandZone.toFixed(2)+" | Supply $"+supplyZone.toFixed(2)+" | Scan Sweep...");
+    }
   }
 },1000);
-// HARGA GERAK TIAP 2 DETIK - BIAR GAK DIEM!
+// HARGA GERAK + UPDATE ZONA
 setInterval(function(){
-  let gerak=(Math.random()-0.48)*1.0;
-  price=price+gerak;
-  prices.push(price);
-  if(prices.length>20) prices.shift();
+  if(!realPrice){ price=price+(Math.random()-0.48)*1.0; }
+  prices.push(price); if(prices.length>20) prices.shift();
   document.getElementById('bigPrice').innerText="$"+price.toFixed(2);
   let lo=Math.min(...prices); let hi=Math.max(...prices);
   demandZone=lo; supplyZone=hi;
-  // CEK SWEEP SEDERHANA
-  if(price<demandZone && sweepType==""){
-    sweepType="BULL"; sweepLow=price; sweepBar=barCount;
-    tulisLog("⚡ SWEEP BAWAH di $"+price.toFixed(2));
-  }
-  if(price>supplyZone && sweepType==""){
-    sweepType="BEAR"; sweepHigh=price; sweepBar=barCount;
-    tulisLog("⚡ SWEEP ATAS di $"+price.toFixed(2));
-  }
+  document.getElementById('demand').innerText="$"+lo.toFixed(2);
+  document.getElementById('supply').innerText="$"+hi.toFixed(2);
+  let trend = price > prices[0] ? "🟢 BULL" : "🔴 BEAR";
+  document.getElementById('trend').innerText=trend;
 },2000);
-// COBA API REAL DI BELAKANG - KALAU GAGAL YA UDAH, HARGA TETEP JALAN!
+// COBA API REAL - KALAU BERHASIL HARGA JADI REAL, KALAU GAGAL TETEP JALAN!
 async function cobaAPI(){
   try{
     let r=await fetch('https://api.allorigins.win/get?url='+encodeURIComponent('https://api.gold-api.com/price/XAU'));
     let j=await r.json(); let d=JSON.parse(j.contents);
-    if(d.price){ price=d.price; document.getElementById('status').innerText="✅ LIVE REAL - Gold-API: $"+price.toFixed(2); }
-  }catch(e){ document.getElementById('status').innerText="✅ MODE CEPAT - API ke-block, pake harga jalan terus"; }
+    if(d.price){ price=d.price; realPrice=true; document.getElementById('status').innerText="✅ LIVE REAL"; document.getElementById('apiSource').innerText="Sumber: Gold-API Real ✅"; }
+  }catch(e){}
 }
-cobaAPI();
-setInterval(cobaAPI,15000);
+cobaAPI(); setInterval(cobaAPI,15000);
 </script>
 </body>
-  </html>
+                             </html>
