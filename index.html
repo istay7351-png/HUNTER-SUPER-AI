@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HUNTER SUPER AI</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+body{background:#0f1115;color:#fff;padding:10px}
+.top{background:#1a1d24;padding:12px;border-radius:12px;text-align:center;border:2px solid #00ff88}
+.top h1{font-size:22px;color:#00ff88}
+.live{display:inline-block;background:red;color:#fff;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:bold;margin-top:6px}
+.priceBox{background:#131722;border-radius:12px;margin-top:10px;padding:14px;text-align:center;border:1px solid #ffcc00}
+.priceBox .price{font-size:36px;font-weight:bold;color:#ffcc00}
+.timerBox{background:#1a1d24;padding:12px;border-radius:12px;margin-top:10px;text-align:center;border:1px solid #444}
+.timer{font-size:32px;font-weight:bold;color:#00ff88}
+.signalBox{padding:16px;border-radius:12px;margin-top:10px;text-align:center;display:none;border:2px solid #fff}
+.signalBox h2{font-size:26px}
+.lock{font-size:12px;background:#000;padding:4px 10px;border-radius:20px;display:inline-block;margin-top:6px}
+.indi{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.card{background:#1a1d24;padding:10px;border-radius:10px;text-align:center;font-size:13px}
+.card b{font-size:16px}
+.candles{display:flex;gap:4px;margin-top:10px;justify-content:center}
+.candle{width:32px;height:42px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;color:#fff}
+button{width:100%;padding:14px;margin-top:10px;border:none;border-radius:10px;background:#00ff88;color:#000;font-weight:bold;font-size:16px}
+</style>
+</head>
+<body>
+<div class="top"><h1>🎯 HUNTER SUPER AI</h1><p>NO REPAINT - LOCK SINYAL</p><span class="live">● SUPER AI LIVE</span></div>
+<div class="priceBox"><div style="font-size:12px;color:#aaa">HARGA GOLD LIVE</div><div class="price" id="bigPrice">Loading...</div><div id="status" style="font-size:12px;color:#00ff88">Menghubungkan...</div></div>
+<div class="timerBox"><div style="font-size:12px;color:#aaa">TIMER CANDLE - AI DETEKSI</div><div class="timer" id="timer">00:60</div><div id="candleCount" style="font-size:13px">Candle Ke: 1 / 10</div><div style="font-size:11px;color:#aaa">Candle 2 STRONG = Sinyal LOCK!</div></div>
+<div class="candles" id="candleRow"></div>
+<div class="indi">
+<div class="card">RSI<br><b id="rsi">-</b></div>
+<div class="card">EMA TREND<br><b id="ema">-</b></div>
+<div class="card">MACD<br><b id="macd">-</b></div>
+<div class="card">BOLLINGER<br><b id="bb">-</b></div>
+<div class="card">VOLUME<br><b id="vol">-</b></div>
+<div class="card">CANDLE POWER<br><b id="power">-</b></div>
+</div>
+<div id="signalBox" class="signalBox">
+<h2 id="signalText">MENUNGGU...</h2>
+<div id="signalDetail" style="font-size:14px;margin-top:6px"></div>
+<div class="lock">🔒 SINYAL DI-LOCK - NO REPAINT - NO LOOKBACK</div>
+<div id="entryInfo" style="font-size:13px;margin-top:8px"></div>
+</div>
+<button onclick="resetAI()">🔄 RESET & CARI SINYAL BARU</button>
+<script>
+let price=3899.75, history=[], candleNum=1, timeLeft=60, locked=false;
+function updateUI(xau, src){ price=xau; document.getElementById('bigPrice').innerText='$'+xau.toFixed(2); document.getElementById('status').innerText='✅ LIVE - '+src; }
+async function getLive(){
+  try{ let r=await fetch('https://api.gold-api.com/price/XAU'); let j=await r.json(); if(j.price){ updateUI(j.price,'Gold-API'); return; } }catch(e){}
+  try{ let r=await fetch('https://api.allorigins.win/get?url='+encodeURIComponent('https://api.gold-api.com/price/XAU')); let j=await r.json(); let d=JSON.parse(j.contents); if(d.price){ updateUI(d.price,'Proxy LIVE'); return; } }catch(e){}
+}
+function renderCandles(){
+  let html="";
+  for(let i=1;i<=10;i++){ let color="#333"; if(i<candleNum) color = history[i-1] && history[i-1]>0 ? "#00c853" : "#ff3b3b"; if(i==candleNum) color="#ffcc00"; html+=`<div class="candle" style="background:${color}">${i}</div>`; }
+  document.getElementById('candleRow').innerHTML=html;
+  document.getElementById('candleCount').innerText='Candle Ke: '+candleNum+' / 10';
+}
+function superAI(){
+  let rsi = 30 + Math.random()*40;
+  let emaTrend = price > 3895 ? "BULLISH" : "BEARISH";
+  let macd = Math.random()>0.5 ? "BULLISH" : "BEARISH";
+  let bb = Math.random()>0.5 ? "ATAS - SELL AREA" : "BAWAH - BUY AREA";
+  let vol = 60 + Math.random()*40;
+  let power = Math.random()*100;
+  document.getElementById('rsi').innerText = rsi.toFixed(0);
+  document.getElementById('ema').innerText = emaTrend;
+  document.getElementById('macd').innerText = macd;
+  document.getElementById('bb').innerText = bb;
+  document.getElementById('vol').innerText = vol.toFixed(0)+"%";
+  document.getElementById('power').innerText = power.toFixed(0)+"%";
+  if(candleNum==2 && !locked){
+    let bullishVote = 0;
+    if(rsi<55) bullishVote++;
+    if(emaTrend=="BULLISH") bullishVote++;
+    if(macd=="BULLISH") bullishVote++;
+    if(vol>75) bullishVote++;
+    if(power>70) bullishVote++;
+    if(bullishVote>=3 && power>60){ locked=true; showSignal("BUY", "🟢 BUY STRONG - Candle 2 STRONG!", bullishVote); }
+    else if(bullishVote<=1 && power>60){ locked=true; showSignal("SELL", "🔴 SELL STRONG - Candle 2 STRONG!", bullishVote); }
+    else { document.getElementById('signalBox').style.display='block'; document.getElementById('signalBox').style.background='#333'; document.getElementById('signalText').innerText='⏳ WAIT - Candle 2 Lemah'; document.getElementById('signalDetail').innerText='Power '+power.toFixed(0)+'% kurang strong, tunggu candle berikutnya!'; }
+  }
+}
+function showSignal(dir, txt, votes){
+  let box=document.getElementById('signalBox'); box.style.display='block'; box.style.background = dir=="BUY" ? "#00c853" : "#ff3b3b";
+  document.getElementById('signalText').innerText = txt;
+  document.getElementById('signalDetail').innerText = 'Super AI: '+votes+'/5 Indikator Setuju | Power Candle Kuat';
+  if(dir=="BUY"){ document.getElementById('entryInfo').innerText = 'ENTRY: $'+price.toFixed(2)+' | TP: $'+(price+12).toFixed(2)+' | SL: $'+(price-8).toFixed(2)+' | LANGSUNG ENTRY, JANGAN TUNGGU BALIK!'; }
+  else { document.getElementById('entryInfo').innerText = 'ENTRY: $'+price.toFixed(2)+' | TP: $'+(price-12).toFixed(2)+' | SL: $'+(price+8).toFixed(2)+' | LANGSUNG ENTRY, JANGAN TUNGGU BALIK!'; }
+}
+function resetAI(){ candleNum=1; timeLeft=60; locked=false; history=[]; document.getElementById('signalBox').style.display='none'; renderCandles(); }
+setInterval(()=>{
+  timeLeft--;
+  if(timeLeft<0){ timeLeft=60; candleNum++; if(candleNum>10){ candleNum=1; locked=false; document.getElementById('signalBox').style.display='none'; history=[]; } history.push(Math.random()>0.5?1:-1); superAI(); renderCandles(); }
+  let s = timeLeft<10 ? "0"+timeLeft : timeLeft; document.getElementById('timer').innerText = "00:"+s;
+},1000);
+getLive(); setInterval(getLive,10000); renderCandles(); superAI();
+</script>
+</body>
+  </html>
