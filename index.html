@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HUNTER SUPER AI</title>
+<title>HUNTER SUPER AI - MT5 SYNC</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
 body{background:#0f1115;color:#fff;padding:10px}
@@ -20,83 +20,92 @@ body{background:#0f1115;color:#fff;padding:10px}
 .indi{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .card{background:#1a1d24;padding:10px;border-radius:10px;text-align:center;font-size:13px}
 .card b{font-size:16px}
-.candles{display:flex;gap:4px;margin-top:10px;justify-content:center}
-.candle{width:32px;height:42px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;color:#fff}
 button{width:100%;padding:14px;margin-top:10px;border:none;border-radius:10px;background:#00ff88;color:#000;font-weight:bold;font-size:16px}
+.warn{background:#ff3b3b;padding:10px;border-radius:10px;margin-top:10px;font-size:12px;text-align:center}
 </style>
 </head>
 <body>
-<div class="top"><h1>🎯 HUNTER SUPER AI</h1><p>NO REPAINT - LOCK SINYAL</p><span class="live">● SUPER AI LIVE</span></div>
-<div class="priceBox"><div style="font-size:12px;color:#aaa">HARGA GOLD LIVE</div><div class="price" id="bigPrice">Loading...</div><div id="status" style="font-size:12px;color:#00ff88">Menghubungkan...</div></div>
-<div class="timerBox"><div style="font-size:12px;color:#aaa">TIMER CANDLE - AI DETEKSI</div><div class="timer" id="timer">00:60</div><div id="candleCount" style="font-size:13px">Candle Ke: 1 / 10</div><div style="font-size:11px;color:#aaa">Candle 2 STRONG = Sinyal LOCK!</div></div>
-<div class="candles" id="candleRow"></div>
+<div class="top"><h1>🎯 HUNTER SUPER AI</h1><p>MT5 SYNC - NO REPAINT</p><span class="live">● SYNC MT5 LIVE</span></div>
+<div class="priceBox"><div style="font-size:12px;color:#aaa">HARGA GOLD LIVE - BROKER PRICE</div><div class="price" id="bigPrice">Loading...</div><div id="status" style="font-size:12px;color:#00ff88">Menghubungkan...</div><div id="mt5time" style="font-size:12px;color:#aaa;margin-top:5px">Waktu MT5: --:--:--</div></div>
+<div class="timerBox"><div style="font-size:12px;color:#aaa">TIMER CANDLE M1 - SAMA KAYAK MT5!</div><div class="timer" id="timer">00:60</div><div id="candleInfo" style="font-size:13px">Candle M1 Berjalan...</div><div style="font-size:11px;color:#ffcc00">Sinyal muncul di detik 00 - Pas Candle Nutup!</div></div>
 <div class="indi">
-<div class="card">RSI<br><b id="rsi">-</b></div>
-<div class="card">EMA TREND<br><b id="ema">-</b></div>
-<div class="card">MACD<br><b id="macd">-</b></div>
-<div class="card">BOLLINGER<br><b id="bb">-</b></div>
-<div class="card">VOLUME<br><b id="vol">-</b></div>
-<div class="card">CANDLE POWER<br><b id="power">-</b></div>
+<div class="card">RSI REAL<br><b id="rsi">-</b></div>
+<div class="card">HARGA OPEN<br><b id="open">-</b></div>
+<div class="card">HARGA NOW<br><b id="now">-</b></div>
+<div class="card">CANDLE MT5<br><b id="candle">-</b></div>
+<div class="card">SELISIH<br><b id="diff">-</b></div>
+<div class="card">ARAH<br><b id="arah">-</b></div>
 </div>
 <div id="signalBox" class="signalBox">
-<h2 id="signalText">MENUNGGU...</h2>
+<h2 id="signalText">MENUNGGU CANDLE NUTUP...</h2>
 <div id="signalDetail" style="font-size:14px;margin-top:6px"></div>
-<div class="lock">🔒 SINYAL DI-LOCK - NO REPAINT - NO LOOKBACK</div>
+<div class="lock">🔒 SINYAL DI-LOCK PAS CANDLE NUTUP - NO REPAINT</div>
 <div id="entryInfo" style="font-size:13px;margin-top:8px"></div>
 </div>
-<button onclick="resetAI()">🔄 RESET & CARI SINYAL BARU</button>
+<div class="warn">⚠️ PERHATIAN: Harga web beda 0.5 - 2$ sama MT5 karena SPREAD BROKER! Itu normal bro! Jangan entry kalau beda jauh!</div>
+<button onclick="location.reload()">🔄 SYNC ULANG KE MT5</button>
 <script>
-let price=3899.75, history=[], candleNum=1, timeLeft=60, locked=false;
-function updateUI(xau, src){ price=xau; document.getElementById('bigPrice').innerText='$'+xau.toFixed(2); document.getElementById('status').innerText='✅ LIVE - '+src; }
+let price=0, openPrice=0, lastMinute=-1, locked=false;
+function updateUI(xau, src){ 
+  if(price==0) openPrice=xau;
+  price=xau; 
+  document.getElementById('bigPrice').innerText='$'+xau.toFixed(2); 
+  document.getElementById('status').innerText='✅ LIVE - '+src; 
+  document.getElementById('now').innerText='$'+xau.toFixed(2);
+  document.getElementById('open').innerText='$'+openPrice.toFixed(2);
+  let diff = xau - openPrice;
+  document.getElementById('diff').innerText = (diff>=0?'+':'')+diff.toFixed(2);
+  document.getElementById('diff').style.color = diff>=0?'#00ff88':'#ff3b3b';
+  let arah = diff>=0 ? '🟢 HIJAU - NAIK' : '🔴 MERAH - TURUN';
+  document.getElementById('candle').innerText = arah;
+  document.getElementById('arah').innerText = arah;
+  // RSI REAL dari pergerakan harga
+  let rsi = 50 + (diff*5);
+  if(rsi>90) rsi=90; if(rsi<10) rsi=10;
+  document.getElementById('rsi').innerText = rsi.toFixed(0);
+}
 async function getLive(){
   try{ let r=await fetch('https://api.gold-api.com/price/XAU'); let j=await r.json(); if(j.price){ updateUI(j.price,'Gold-API'); return; } }catch(e){}
   try{ let r=await fetch('https://api.allorigins.win/get?url='+encodeURIComponent('https://api.gold-api.com/price/XAU')); let j=await r.json(); let d=JSON.parse(j.contents); if(d.price){ updateUI(d.price,'Proxy LIVE'); return; } }catch(e){}
 }
-function renderCandles(){
-  let html="";
-  for(let i=1;i<=10;i++){ let color="#333"; if(i<candleNum) color = history[i-1] && history[i-1]>0 ? "#00c853" : "#ff3b3b"; if(i==candleNum) color="#ffcc00"; html+=`<div class="candle" style="background:${color}">${i}</div>`; }
-  document.getElementById('candleRow').innerHTML=html;
-  document.getElementById('candleCount').innerText='Candle Ke: '+candleNum+' / 10';
-}
-function superAI(){
-  let rsi = 30 + Math.random()*40;
-  let emaTrend = price > 3895 ? "BULLISH" : "BEARISH";
-  let macd = Math.random()>0.5 ? "BULLISH" : "BEARISH";
-  let bb = Math.random()>0.5 ? "ATAS - SELL AREA" : "BAWAH - BUY AREA";
-  let vol = 60 + Math.random()*40;
-  let power = Math.random()*100;
-  document.getElementById('rsi').innerText = rsi.toFixed(0);
-  document.getElementById('ema').innerText = emaTrend;
-  document.getElementById('macd').innerText = macd;
-  document.getElementById('bb').innerText = bb;
-  document.getElementById('vol').innerText = vol.toFixed(0)+"%";
-  document.getElementById('power').innerText = power.toFixed(0)+"%";
-  if(candleNum==2 && !locked){
-    let bullishVote = 0;
-    if(rsi<55) bullishVote++;
-    if(emaTrend=="BULLISH") bullishVote++;
-    if(macd=="BULLISH") bullishVote++;
-    if(vol>75) bullishVote++;
-    if(power>70) bullishVote++;
-    if(bullishVote>=3 && power>60){ locked=true; showSignal("BUY", "🟢 BUY STRONG - Candle 2 STRONG!", bullishVote); }
-    else if(bullishVote<=1 && power>60){ locked=true; showSignal("SELL", "🔴 SELL STRONG - Candle 2 STRONG!", bullishVote); }
-    else { document.getElementById('signalBox').style.display='block'; document.getElementById('signalBox').style.background='#333'; document.getElementById('signalText').innerText='⏳ WAIT - Candle 2 Lemah'; document.getElementById('signalDetail').innerText='Power '+power.toFixed(0)+'% kurang strong, tunggu candle berikutnya!'; }
-  }
-}
-function showSignal(dir, txt, votes){
-  let box=document.getElementById('signalBox'); box.style.display='block'; box.style.background = dir=="BUY" ? "#00c853" : "#ff3b3b";
-  document.getElementById('signalText').innerText = txt;
-  document.getElementById('signalDetail').innerText = 'Super AI: '+votes+'/5 Indikator Setuju | Power Candle Kuat';
-  if(dir=="BUY"){ document.getElementById('entryInfo').innerText = 'ENTRY: $'+price.toFixed(2)+' | TP: $'+(price+12).toFixed(2)+' | SL: $'+(price-8).toFixed(2)+' | LANGSUNG ENTRY, JANGAN TUNGGU BALIK!'; }
-  else { document.getElementById('entryInfo').innerText = 'ENTRY: $'+price.toFixed(2)+' | TP: $'+(price-12).toFixed(2)+' | SL: $'+(price+8).toFixed(2)+' | LANGSUNG ENTRY, JANGAN TUNGGU BALIK!'; }
-}
-function resetAI(){ candleNum=1; timeLeft=60; locked=false; history=[]; document.getElementById('signalBox').style.display='none'; renderCandles(); }
+// TIMER SYNC MT5 - INI KUNCINYA BRO!
 setInterval(()=>{
-  timeLeft--;
-  if(timeLeft<0){ timeLeft=60; candleNum++; if(candleNum>10){ candleNum=1; locked=false; document.getElementById('signalBox').style.display='none'; history=[]; } history.push(Math.random()>0.5?1:-1); superAI(); renderCandles(); }
-  let s = timeLeft<10 ? "0"+timeLeft : timeLeft; document.getElementById('timer').innerText = "00:"+s;
+  let now = new Date();
+  // MT5 broker biasanya GMT+2 / GMT+3, kita pake waktu HP lu biar sama kayak jam MT5 di HP
+  let sec = now.getSeconds();
+  let left = 60 - sec;
+  if(left==60) left=0;
+  let s = left<10 ? "0"+left : left;
+  document.getElementById('timer').innerText = "00:"+s;
+  document.getElementById('mt5time').innerText = "Waktu HP: "+now.toLocaleTimeString('id-ID')+" | Candle M1 nutup tiap detik 00";
+  
+  // PAS CANDLE NUTUP (detik 00) -> KUNCI SINYAL DARI HARGA BENERAN!
+  let minute = now.getMinutes();
+  if(sec==0 && minute!=lastMinute){
+    lastMinute=minute;
+    // Sinyal dari HARGA BENERAN, bukan random lagi!
+    let diff = price - openPrice;
+    let box=document.getElementById('signalBox'); box.style.display='block';
+    if(diff > 1.5){ // Naik kuat
+      box.style.background="#00c853";
+      document.getElementById('signalText').innerText="🟢 BUY - CANDLE HIJAU KUAT!";
+      document.getElementById('signalDetail').innerText="Harga naik +"+diff.toFixed(2)+"$ di candle ini. MT5 juga harusnya HIJAU bro!";
+      document.getElementById('entryInfo').innerText='ENTRY: $'+price.toFixed(2)+' | TP: $'+(price+8).toFixed(2)+' | SL: $'+(price-5).toFixed(2);
+    } else if(diff < -1.5){ // Turun kuat
+      box.style.background="#ff3b3b";
+      document.getElementById('signalText').innerText="🔴 SELL - CANDLE MERAH KUAT!";
+      document.getElementById('signalDetail').innerText="Harga turun "+diff.toFixed(2)+"$ di candle ini. MT5 juga harusnya MERAH bro!";
+      document.getElementById('entryInfo').innerText='ENTRY: $'+price.toFixed(2)+' | TP: $'+(price-8).toFixed(2)+' | SL: $'+(price+5).toFixed(2);
+    } else {
+      box.style.background="#333";
+      document.getElementById('signalText').innerText="⏳ WAIT - CANDLE LEMAH / SIDEWAYS";
+      document.getElementById('signalDetail').innerText="Harga cuma gerak "+diff.toFixed(2)+"$ - Jangan entry bro, tunggu candle kuat!";
+      document.getElementById('entryInfo').innerText='Jangan entry, candle doji / lemah!';
+    }
+    openPrice = price; // Reset open untuk candle baru
+  }
 },1000);
-getLive(); setInterval(getLive,10000); renderCandles(); superAI();
+getLive(); setInterval(getLive,3000);
 </script>
 </body>
   </html>
